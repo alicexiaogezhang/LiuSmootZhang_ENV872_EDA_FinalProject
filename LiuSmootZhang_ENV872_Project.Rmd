@@ -19,20 +19,26 @@ knitr::opts_chunk$set(echo = TRUE)
 #Install familiar packages
 library(tidyverse);library(lubridate);library(viridis);library(here)
 
-install.packages("rvest")
+#install.packages("rvest")
 library(rvest)
 
-install.packages("dataRetrieval")
+#install.packages("dataRetrieval")
 library(dataRetrieval)
 
-install.packages("tidycensus")
+#install.packages("tidycensus")
 library(tidycensus)
 library(dplyr)
 library(rvest)
 library(ggplot2)
 
-install.packages("corrplot")
+#install.packages("corrplot")
 library(corrplot)
+library(stringr)
+
+library(sf)
+library(leaflet)
+library(mapview); mapviewOptions(fgb = FALSE)
+sf::sf_use_s2(FALSE)
 
 ```
 
@@ -291,6 +297,38 @@ hist(final_naomit$Electricity_Cost)
 hist(final_naomit$Average_IQ)
 hist(final_naomit$Republican_vote)
 ```
+
+
+```{r}
+# read in the shapefile
+powerp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/Power_Plants.shp')
+powerp$PrimSource <- as.factor(powerp$PrimSource)
+
+unique(powerp$PrimSource)
+powerp$PrimSource <- str_trim(powerp$PrimSource, 'both')
+# clean energy: biomass, geothermal, hydroelectric, pumped, nuclear, solar, wind
+# create new column: clean energy
+powerp$clean <- with(powerp,
+                     ifelse(PrimSource=='biomass'|PrimSource=='geothermal'|PrimSource=='hydroelectric'|PrimSource=='pumpedstorage'|PrimSource=='nuclear'|PrimSource=='solar'|PrimSource=='wind', 'clean energy', 'others'))
+
+powerp$clean <- as.factor(powerp$clean)
+
+# colors for the map widget
+pal <- colorFactor(c('skyblue','tomato'), powerp$clean)
+# make the map widget
+leaflet(powerp) %>% 
+  addProviderTiles(providers$CartoDB.Positron)%>%  
+  addCircleMarkers(
+    radius = ~sqrt(Total_MW)/5,
+    color = ~pal(clean),
+    stroke = FALSE, fillOpacity = 0.5
+  ) %>% 
+  addLegend("bottomright", pal = pal, values = ~clean,
+    title = "Power plants",
+    opacity = 1
+  )
+```
+
 
 ```{r regression}
 TPAIC <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + log(Oil_Production) + log(GDP) + Sunshine + log(Electricity_Cost) + Average_IQ + Republican_vote)
