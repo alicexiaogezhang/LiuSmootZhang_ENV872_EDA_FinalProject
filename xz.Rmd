@@ -77,3 +77,59 @@ state_ranking$Average_IQ <- as.numeric(state_ranking$Average_IQ)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+trying to plot some shapefiles
+```{r}
+library(sf)
+library(leaflet)
+library(mapview); mapviewOptions(fgb = FALSE)
+sf::sf_use_s2(FALSE)
+```
+```{r}
+# read in the shapefile
+powerp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/Power_Plants.shp')
+powerp$PrimSource <- as.factor(powerp$PrimSource)
+```
+```{r}
+#mapView(powerp, zcol = "PrimSource")
+```
+
+
+```{r}
+unique(powerp$PrimSource)
+powerp$PrimSource <- str_trim(powerp$PrimSource, 'both')
+
+# clean energy: biomass, geothermal, hydroelectric, pumped, nuclear, solar, wind
+
+# create new column: clean energy
+powerp$clean <- with(powerp,
+                     ifelse(PrimSource=='biomass'|PrimSource=='geothermal'|PrimSource=='hydroelectric'|PrimSource=='pumpedstorage'|PrimSource=='nuclear'|PrimSource=='solar'|PrimSource=='wind', 'clean energy', 'others'))
+
+powerp$clean <- as.factor(powerp$clean)
+```
+
+```{r}
+leaflet() %>% 
+  addProviderTiles(providers$Esri.DeLorme) %>%  
+  addPolygons(data = counties_WGS84, 
+              color = "orange", 
+              weight = 1, 
+              smoothFactor = 0.5,   
+              opacity = 1.0, 
+              fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlGnBu", ALAND)(ALAND)) %>% 
+  addPolygons(data = huc2_WGS84, 
+              color=NA, 
+              weight = 2) %>% 
+  addMarkers(data=EPAair_wgs84,
+             popup = ~as.character(`Site Name`))
+
+
+
+leaflet() %>% addTiles() %>% 
+  addPolygons(data=counties_WGS84,weight=1,color='red') %>% 
+  addPolygons(data=huc8s_WGS84,weight=1)
+```
+
+
