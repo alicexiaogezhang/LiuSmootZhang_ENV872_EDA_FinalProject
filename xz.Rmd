@@ -54,7 +54,26 @@ state_ranking$Oil_Production <- gsub(',','', state_ranking$Oil_Production)
 state_ranking$Oil_Production <- as.numeric(state_ranking$Oil_Production)
 
 # remove $ in GDP
+state_ranking$GDP <- str_sub(state_ranking$GDP, 2)
+# remove comma
+state_ranking$GDP <- gsub(',','', state_ranking$GDP)
+# change to numeric
+state_ranking$GDP <- as.numeric(state_ranking$GDP)
 
+# remove unit in sunshine
+state_ranking$Sunshine <- str_sub(state_ranking$Sunshine, end=-6)
+# remove comma
+state_ranking$Sunshine <- gsub(',','', state_ranking$Sunshine)
+# change to numeric
+state_ranking$Sunshine <- as.numeric(state_ranking$Sunshine)
+
+# clean electricity_cost
+state_ranking$Electricity_Cost <- str_sub(state_ranking$Electricity_Cost, end=-8)
+state_ranking$Electricity_Cost <- str_sub(state_ranking$Electricity_Cost, 2)
+state_ranking$Electricity_Cost <- as.numeric(state_ranking$Electricity_Cost)
+
+# clean average
+state_ranking$Average_IQ <- as.numeric(state_ranking$Average_IQ)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
