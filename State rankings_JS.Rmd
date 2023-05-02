@@ -153,4 +153,9 @@ state_rankings_df_merge <- Reduce(function(x, y) merge(x, y, by = "States", all 
 state_rankings_df_merge
 ```
 
+```{r}
+write.csv(state_rankings_df_merge, file = "state rankings_raw",
+          row.names = FALSE)
+```
+
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
