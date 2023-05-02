@@ -4,7 +4,7 @@ output: html_document
 date: "2023-05-02"
 ---
 
-### Rationale and Research Questions
+## Rationale and Research Questions
 The transition to renewable energy is a critical issue for mitigating climate change and promoting sustainable development. As the world's second-largest carbon emitter (https://www.epa.gov/ghgemissions/global-greenhouse-gas-emissions-data), the United States has set ambitious targets for reducing greenhouse gas emissions and increasing renewable energy generation. However, the factors that drive renewable energy adoption in the US are not fully understood, and there is a need for more research to identify the most effective policies and incentives for promoting clean energy. 
 
 In this project, we aim to investigate the key drivers of renewable energy adoption in the US and their relative importance. We will use a comprehensive dataset derived from public-facing websites which includes information on state-level renewable energy capacity, energy policies, economic indicators, and demographic variables. 
@@ -13,6 +13,7 @@ Our research questions include:
 1. How do economic indicators, such as energy prices, GDP, and oil production, influence renewable energy adoption in different regions of the US?
 2. What role do demographic variables, such as IQ and political affiliation, play in shaping attitudes towards renewable energy and driving adoption?
 
+### Project Setup
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #1
@@ -42,7 +43,7 @@ sf::sf_use_s2(FALSE)
 
 ```
 
-### Dataset information
+## Dataset information
 The dataset for this analysis was collected from various sources including the National Renewable Energy Laboratory (NREL), the United States Energy Information Administration (EIA), and wisevoter.com. The dataset includes information on various factors that may drive renewable energy adoption in the US, such as state-level policies, economic indicators, demographic characteristics, and natural resources.
 
 The dataset was first imported into R as separate data frames and then merged into a single data frame using the merge() function. Before merging, data cleaning and manipulation were performed to ensure consistency across variables and eliminate missing values. For instance, some variables were renamed, and missing values were replaced with appropriate values or removed entirely.
@@ -58,7 +59,7 @@ The final dataset contains 50 observations (one for each state) and 7 variables.
 | Average_IQ                      | IQ points | 94.8-103.9           | wisevoter.com |
 | Republican_vote                 | Percentage| 23.5-70.4            | wisevoter.com |
 
-
+### Data Scraping
 ```{r air quality data scraping}
 url_aq <- "https://wisevoter.com/state-rankings/air-quality-by-state/"
 page1 <- read_html(url_aq)
@@ -209,6 +210,7 @@ write.csv(state_rankings_df_merge, file = "state rankings_raw.csv",
           row.names = FALSE)
 ```
 
+### Data Cleaning
 Next, we clean the data scraped from various websites before merging it with the power plant data. The dataframe we have right now consisted of columns made of chars. After removing the units (such as per kWh) and characters (such as comma and $), we converted the chars to numeric values and created additional columns as needed based on existing columns.
 
 ```{r}
@@ -259,6 +261,7 @@ state_ranking$Republican_vote <- as.numeric(state_ranking$Republican_vote)
 state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, "Red", "Blue"))
 ```
 
+For the response variable, clean energy adoption rate, data wrangling and calculation are needed. We first transform all NAs to 0 so that we can later aggregate the capacity for each energy source. The next step is to calculate the total clean energy capacity and total energy generation capacity for each power plant. After that, we aggregate all the power plants by states and calculate the clean energy percentage for each state. 
 
 ```{r}
 Power_plant <- read.csv(here("data_raw/Power_Plants.csv"), stringsAsFactors = TRUE)
@@ -275,31 +278,39 @@ Clean_energy$Clean_percent <- Clean_energy$Clean_energy_MW/Clean_energy$Total_MW
 
 ```
 
+We merge the two clean datasets as one final dataset that is ready for analysis. 
+
 ```{r}
 final_df <- merge(Clean_energy, state_ranking)
 ```
 
-```{r}
+
+## Exploratory Analysis
+### Correlation plots
+We plot correlation plots to explore the covariance among response and explanatory variables. 
+```{r corr plot}
 final_naomit <- final_df %>%
   select(Clean_percent:Republican_vote) %>%
   na.omit()
 final_corr <- cor(final_naomit)
-corrplot.mixed(final_corr, upper = "ellipse")
+corrplot.mixed(final_corr, upper = "ellipse", tl.cex = 0.6)
 ```
-```{r}
+### Histogram
+We want to take a deeper dive into the distribution of each variables by histograms. Based on the histograms, oil production, GDP and electricity cost are skewed, which indicates that transformation is needed for those variables. 
+```{r histogram}
 par(mfrow=c(2,4))
-hist(final_naomit$Clean_percent)
-hist(final_naomit$Good_Air_Quality_Days_Percentage)
-hist(final_naomit$Oil_Production)
-hist(final_naomit$GDP)
-hist(final_naomit$Sunshine)
-hist(final_naomit$Electricity_Cost)
-hist(final_naomit$Average_IQ)
-hist(final_naomit$Republican_vote)
+hist(final_naomit$Clean_percent, xlab = "Clean Energy Adoption %", main = NULL)
+hist(final_naomit$Good_Air_Quality_Days_Percentage, xlab = "Good Air Quality Days %", main = NULL)
+hist(final_naomit$Oil_Production, xlab = "Good Air Quality Days %", main = NULL)
+hist(final_naomit$GDP, xlab = "GDP", main = NULL)
+hist(final_naomit$Sunshine, xlab = "Sunshine", main = NULL)
+hist(final_naomit$Electricity_Cost, xlab = "Electricity Cost", main = NULL)
+hist(final_naomit$Average_IQ, xlab = "Average IQ", main = NULL)
+hist(final_naomit$Republican_vote, xlab = "Republican Vote", main = NULL)
 ```
 
-
-```{r}
+### Map
+```{r map}
 # read in the shapefile
 powerp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/Power_Plants.shp')
 powerp$PrimSource <- as.factor(powerp$PrimSource)
@@ -329,28 +340,38 @@ leaflet(powerp) %>%
   )
 ```
 
+## Analysis
+### Regression Analysis
+Given the skewed distribution of certain variables, we use the log-transformed versions in the Generalized Linear Model (GLM). Out of the concern of  over-parameterize a linear model, we use the Akaike's Information Criterion (AIC) to compute a stepwise regression that removes explanatory variables from a full set of suggested options. 
+
+We feed all potential explanatory variables into the full model and use step() function to decide the optimal model. Based on the stepwise regression, we narrow down the explanatory variables to air quality, logged GDP, average IQ and Republican vote. 
 
 ```{r regression}
 TPAIC <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + log(Oil_Production) + log(GDP) + Sunshine + log(Electricity_Cost) + Average_IQ + Republican_vote)
 
 #Choose a model by AIC in a Stepwise Algorithm
 step(TPAIC)
-TPmodel <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + 
-    log(GDP) + Average_IQ + Republican_vote)
+TPmodel <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + log(GDP) + Average_IQ + Republican_vote)
 summary(TPmodel)
 ```
+
+With a degree of freedom of 26, our finalized model shows that the explanatory variables can account for 38.34% of the observed variance in response variable. This regression has a p-value of 0.01, indicating strong statistical significance. Among the explanatory variables, logged GDP and Republican vote are highly statistical significant (p-value < 0.05) while air quality and average IQ are less significant with p-values ranging from 0.05 to 0.1.
+
 
 ```{r}
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(TPmodel)
 par(mfrow = c(1,1))
 ```
+Based on the above plots, there are no outliners that significantly impact the regression result. 
 
+### T Test
 
 ```{r ttest}
 party <- t.test(final_df$Clean_percent ~ final_df$party)
 party
 ```
+Based on the T-test result, the clean energy adoption rate for Red and Blue states are different. The p-value for the test is 0.2857 (>0.05) so we fail to reject the null hypothesis of equality. The boxplots below verify the t-test result. 
 
 ```{r}
 ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
@@ -359,5 +380,5 @@ ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
   scale_fill_manual(values=c("skyblue3", "firebrick3"))
 ```
 
-```
+## Conclusion
 
