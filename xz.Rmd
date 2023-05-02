@@ -2,7 +2,9 @@
 title: "clean state_rankings_raw data"
 author: "XZ"
 date: "2023-05-02"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -123,8 +125,5 @@ leaflet(powerp) %>%
     title = "Power plants",
     opacity = 1
   )
-
-
-
 
 ```
