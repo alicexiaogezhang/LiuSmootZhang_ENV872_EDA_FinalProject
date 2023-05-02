@@ -1,9 +1,17 @@
 ---
-title: "LIU"
+title: "LiuSmootZhang_ENV872_Project"
 output: html_document
 date: "2023-05-02"
 ---
 
+### Rationale and Research Questions
+The transition to renewable energy is a critical issue for mitigating climate change and promoting sustainable development. As the world's second-largest carbon emitter (https://www.epa.gov/ghgemissions/global-greenhouse-gas-emissions-data), the United States has set ambitious targets for reducing greenhouse gas emissions and increasing renewable energy generation. However, the factors that drive renewable energy adoption in the US are not fully understood, and there is a need for more research to identify the most effective policies and incentives for promoting clean energy. 
+
+In this project, we aim to investigate the key drivers of renewable energy adoption in the US and their relative importance. We will use a comprehensive dataset derived from public-facing websites which includes information on state-level renewable energy capacity, energy policies, economic indicators, and demographic variables. 
+
+Our research questions include:
+1. How do economic indicators, such as energy prices, GDP, and oil production, influence renewable energy adoption in different regions of the US?
+2. What role do demographic variables, such as IQ and political affiliation, play in shaping attitudes towards renewable energy and driving adoption?
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -28,14 +36,27 @@ library(corrplot)
 
 ```
 
+### Dataset information
+The dataset for this analysis was collected from various sources including the National Renewable Energy Laboratory (NREL), the United States Energy Information Administration (EIA), and wisevoter.com. The dataset includes information on various factors that may drive renewable energy adoption in the US, such as state-level policies, economic indicators, demographic characteristics, and natural resources.
 
-```{r html}
+The dataset was first imported into R as separate data frames and then merged into a single data frame using the merge() function. Before merging, data cleaning and manipulation were performed to ensure consistency across variables and eliminate missing values. For instance, some variables were renamed, and missing values were replaced with appropriate values or removed entirely.
+
+The final dataset contains 50 observations (one for each state) and 7 variables. The variables in the dataset are summarized in the table below:
+| Variable                        | Unit      | Range / Central Tendency | Data Source                         |
+|---------------------------------|-----------|--------------------------|-------------------------------------|
+| Good_Air_Quality_Days_Percentage| Percentage| 35.8-89.4                | wisevoter.com |
+| Oil_Production                  | Thousand barrels per day | 0-4700| wisevoter.com |
+| GDP                             | Billion dollars | 54.7-2,784.1         | wisevoter.com    |
+| Sunshine                        | Hours per day | 3.7-10.3            | wisevoter.com |
+| Electricity_Cost                | Cents per kilowatt hour | 5.6-20.5   | wisevoter.com |
+| Average_IQ                      | IQ points | 94.8-103.9           | wisevoter.com |
+| Republican_vote                 | Percentage| 23.5-70.4            | wisevoter.com |
+
+
+```{r air quality data scraping}
 url_aq <- "https://wisevoter.com/state-rankings/air-quality-by-state/"
 page1 <- read_html(url_aq)
-```
 
-
-```{r pressure, echo=FALSE}
 states <- page1 %>% 
   html_nodes("td:nth-child(2)") %>% 
   html_text()
@@ -51,7 +72,7 @@ df_aq <- data.frame(
 
 ```
 
-```{r}
+```{r oil production data scraping}
 url_oil <- "https://wisevoter.com/state-rankings/oil-production-by-state/"
 page2 <- read_html(url_oil)
 
@@ -69,7 +90,7 @@ df_oil <- data.frame(
 )
 ```
 
-```{r}
+```{r GDP data scraping}
 
 url_gdp <- "https://wisevoter.com/state-rankings/gdp-by-state/"
 page <- read_html(url_gdp)
@@ -89,7 +110,7 @@ df_gdp <- data.frame(
 
 ```
 
-```{r}
+```{r sunlight data scraping}
 
 url_sunny <- "https://wisevoter.com/state-rankings/sunniest-states/"
 page <- read_html(url_sunny)
@@ -109,7 +130,7 @@ df_sunny <- data.frame(
 
 ```
 
-```{r}
+```{r electricity cost data scraping}
 
 url_elec <- "https://wisevoter.com/state-rankings/electricity-cost-by-state/"
 page <- read_html(url_elec)
@@ -129,7 +150,7 @@ df_ecost <- data.frame(
 
 ```
 
-```{r}
+```{r IQ data scraping}
 
 url_iq <- "https://wisevoter.com/state-rankings/average-iq-by-state/"
 page <- read_html(url_iq)
@@ -149,7 +170,7 @@ df_iq <- data.frame(
 
 ```
 
-```{r}
+```{r party affiliation data scraping}
 url_party <- "https://wisevoter.com/state-rankings/red-and-blue-states"
 page <- read_html(url_party)
 
@@ -181,6 +202,8 @@ state_rankings_df_merge
 write.csv(state_rankings_df_merge, file = "state rankings_raw.csv",
           row.names = FALSE)
 ```
+
+Next, we clean the data scraped from various websites before merging it with the power plant data. The dataframe we have right now consisted of columns made of chars. After removing the units (such as per kWh) and characters (such as comma and $), we converted the chars to numeric values and created additional columns as needed based on existing columns.
 
 ```{r}
 # read in raw data
@@ -222,13 +245,14 @@ state_ranking$Electricity_Cost <- as.numeric(state_ranking$Electricity_Cost)
 # clean average
 state_ranking$Average_IQ <- as.numeric(state_ranking$Average_IQ)
 
-# clean repblican_vote
+# clean republican_vote
 state_ranking$Republican_vote <- str_sub(state_ranking$Republican_vote, end=-2)
 state_ranking$Republican_vote <- as.numeric(state_ranking$Republican_vote)
 
-# create new column: category
+# create new column: party affiliation
 state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, "Red", "Blue"))
 ```
+
 
 ```{r}
 Power_plant <- read.csv(here("data_raw/Power_Plants.csv"), stringsAsFactors = TRUE)
