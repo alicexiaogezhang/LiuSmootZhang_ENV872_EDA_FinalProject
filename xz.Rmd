@@ -34,7 +34,6 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-
 ```{r}
 # read in raw data
 state_ranking <- read.csv('state rankings_raw.csv', header = TRUE)
@@ -78,23 +77,24 @@ state_ranking$Average_IQ <- as.numeric(state_ranking$Average_IQ)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-
 trying to plot some shapefiles
+
 ```{r}
 library(sf)
 library(leaflet)
 library(mapview); mapviewOptions(fgb = FALSE)
 sf::sf_use_s2(FALSE)
 ```
+
 ```{r}
 # read in the shapefile
 powerp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/Power_Plants.shp')
 powerp$PrimSource <- as.factor(powerp$PrimSource)
 ```
+
 ```{r}
 #mapView(powerp, zcol = "PrimSource")
 ```
-
 
 ```{r}
 unique(powerp$PrimSource)
@@ -110,26 +110,21 @@ powerp$clean <- as.factor(powerp$clean)
 ```
 
 ```{r}
-leaflet() %>% 
-  addProviderTiles(providers$Esri.DeLorme) %>%  
-  addPolygons(data = counties_WGS84, 
-              color = "orange", 
-              weight = 1, 
-              smoothFactor = 0.5,   
-              opacity = 1.0, 
-              fillOpacity = 0.5,
-              fillColor = ~colorQuantile("YlGnBu", ALAND)(ALAND)) %>% 
-  addPolygons(data = huc2_WGS84, 
-              color=NA, 
-              weight = 2) %>% 
-  addMarkers(data=EPAair_wgs84,
-             popup = ~as.character(`Site Name`))
+pal <- colorFactor(c('skyblue','tomato'), powerp$clean)
+
+leaflet(powerp) %>% 
+  addProviderTiles(providers$CartoDB.Positron)%>%  
+  addCircleMarkers(
+    radius = ~sqrt(Total_MW)/5,
+    color = ~pal(clean),
+    stroke = FALSE, fillOpacity = 0.5
+  ) %>% 
+  addLegend("bottomright", pal = pal, values = ~clean,
+    title = "Power plants",
+    opacity = 1
+  )
 
 
 
-leaflet() %>% addTiles() %>% 
-  addPolygons(data=counties_WGS84,weight=1,color='red') %>% 
-  addPolygons(data=huc8s_WGS84,weight=1)
+
 ```
-
-
