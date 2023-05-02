@@ -12,17 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 #Install familiar packages
 library(tidyverse);library(lubridate);library(viridis);library(here)
 
-install.packages("rvest")
 library(rvest)
 
-install.packages("dataRetrieval")
+#install.packages("dataRetrieval")
 library(dataRetrieval)
 
-install.packages("tidycensus")
+#install.packages("tidycensus")
 library(tidycensus)
 library(dplyr)
 library(rvest)
 library(ggplot2)
+```
+
+```{r}
+library(stringr)
 ```
 
 ## R Markdown
@@ -31,7 +34,27 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r }
+
+```{r}
+# read in raw data
+state_ranking <- read.csv('state rankings_raw.csv', header = TRUE)
+# save a copy of raw data before making changes
+state_ranking_raw <- state_ranking
+
+# remove % in good_air_q col
+state_ranking$Good_Air_Quality_Days_Percentage <- str_sub(state_ranking$Good_Air_Quality_Days_Percentage, end = -2)
+# change chr to numeric
+state_ranking$Good_Air_Quality_Days_Percentage <- as.numeric(state_ranking$Good_Air_Quality_Days_Percentage)
+
+# remove unit in oil_production
+state_ranking$Oil_Production <- str_sub(state_ranking$Oil_Production, end = -5)
+# remove comma 
+state_ranking$Oil_Production <- gsub(',','', state_ranking$Oil_Production)
+# change chr to numeric
+state_ranking$Oil_Production <- as.numeric(state_ranking$Oil_Production)
+
+# remove $ in GDP
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
