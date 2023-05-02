@@ -23,6 +23,9 @@ library(dplyr)
 library(rvest)
 library(ggplot2)
 
+install.packages("corrplot")
+library(corrplot)
+
 ```
 
 
@@ -224,7 +227,7 @@ state_ranking$Republican_vote <- str_sub(state_ranking$Republican_vote, end=-2)
 state_ranking$Republican_vote <- as.numeric(state_ranking$Republican_vote)
 
 # create new column: category
-state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, 1, 0))
+state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, "Red", "Blue"))
 ```
 
 ```{r}
@@ -244,10 +247,55 @@ Clean_energy$Clean_percent <- Clean_energy$Clean_energy_MW/Clean_energy$Total_MW
 
 ```{r}
 final_df <- merge(Clean_energy, state_ranking)
+```
 
+```{r}
+final_naomit <- final_df %>%
+  select(Clean_percent:Republican_vote) %>%
+  na.omit()
+final_corr <- cor(final_naomit)
+corrplot.mixed(final_corr, upper = "ellipse")
+```
+```{r}
+par(mfrow=c(2,4))
+hist(final_naomit$Clean_percent)
+hist(final_naomit$Good_Air_Quality_Days_Percentage)
+hist(final_naomit$Oil_Production)
+hist(final_naomit$GDP)
+hist(final_naomit$Sunshine)
+hist(final_naomit$Electricity_Cost)
+hist(final_naomit$Average_IQ)
+hist(final_naomit$Republican_vote)
+```
+
+```{r regression}
+TPAIC <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + log(Oil_Production) + log(GDP) + Sunshine + log(Electricity_Cost) + Average_IQ + Republican_vote)
+
+#Choose a model by AIC in a Stepwise Algorithm
+step(TPAIC)
+TPmodel <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percentage + 
+    log(GDP) + Average_IQ + Republican_vote)
+summary(TPmodel)
+```
+
+```{r}
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(TPmodel)
+par(mfrow = c(1,1))
 ```
 
 
+```{r ttest}
+party <- t.test(final_df$Clean_percent ~ final_df$party)
+party
+```
 
+```{r}
+ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
+  geom_boxplot()+
+  labs(title = "Clean Energy Adoption Rate by Red or Blue State", y="Clean Energy Percentage (%)", x="Party", fill ="Party")+
+  scale_fill_manual(values=c("skyblue3", "firebrick3"))
+```
 
+```
 
