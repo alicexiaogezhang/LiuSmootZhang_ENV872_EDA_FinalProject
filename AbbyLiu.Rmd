@@ -281,7 +281,7 @@ final_naomit <- final_df %>%
   select(Clean_percent:Republican_vote) %>%
   na.omit()
 final_corr <- cor(final_naomit)
-corrplot.mixed(final_corr, upper = "ellipse")
+corrplot.mixed(final_corr, upper = "ellipse", tl.cex = 0.5)
 ```
 
 ```{r}
