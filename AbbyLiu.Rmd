@@ -147,12 +147,84 @@ df_iq <- data.frame(
 ```
 
 ```{r}
+url_party <- "https://wisevoter.com/state-rankings/red-and-blue-states"
+page <- read_html(url_party)
+
+states7 <- page %>% 
+  html_nodes("td:nth-child(1)") %>% 
+  html_text()
+
+rep_vote <- page %>% 
+  html_nodes("td:nth-child(3)") %>% 
+  html_text()
+
+df_party <- data.frame(
+  States = states7,
+  Republican_vote = rep_vote
+)
+```
+
+```{r}
 # Merge data frames
 state_rankings_df_merge <- Reduce(function(x, y) merge(x, y, by = "States", all = TRUE), 
-                   list(df_aq, df_oil, df_gdp, df_sunny, df_ecost, df_iq))
+                   list(df_aq, df_oil, df_gdp, df_sunny, df_ecost, df_iq, df_party))
 
 # View merged data frame
 state_rankings_df_merge
+```
+
+
+```{r}
+write.csv(state_rankings_df_merge, file = "state rankings_raw.csv",
+          row.names = FALSE)
+```
+
+```{r}
+# read in raw data
+state_ranking <- read.csv('state rankings_raw.csv', header = TRUE)
+# save a copy of raw data before making changes
+state_ranking_raw <- state_ranking
+
+# remove % in good_air_q col
+state_ranking$Good_Air_Quality_Days_Percentage <- str_sub(state_ranking$Good_Air_Quality_Days_Percentage, end = -2)
+# change chr to numeric
+state_ranking$Good_Air_Quality_Days_Percentage <- as.numeric(state_ranking$Good_Air_Quality_Days_Percentage)
+
+# remove unit in oil_production
+state_ranking$Oil_Production <- str_sub(state_ranking$Oil_Production, end = -5)
+# remove comma 
+state_ranking$Oil_Production <- gsub(',','', state_ranking$Oil_Production)
+# change chr to numeric
+state_ranking$Oil_Production <- as.numeric(state_ranking$Oil_Production)
+
+# remove $ in GDP
+state_ranking$GDP <- str_sub(state_ranking$GDP, 2)
+# remove comma
+state_ranking$GDP <- gsub(',','', state_ranking$GDP)
+# change to numeric
+state_ranking$GDP <- as.numeric(state_ranking$GDP)
+
+# remove unit in sunshine
+state_ranking$Sunshine <- str_sub(state_ranking$Sunshine, end=-6)
+# remove comma
+state_ranking$Sunshine <- gsub(',','', state_ranking$Sunshine)
+# change to numeric
+state_ranking$Sunshine <- as.numeric(state_ranking$Sunshine)
+
+# clean electricity_cost
+state_ranking$Electricity_Cost <- str_sub(state_ranking$Electricity_Cost, end=-8)
+state_ranking$Electricity_Cost <- str_sub(state_ranking$Electricity_Cost, 2)
+state_ranking$Electricity_Cost <- as.numeric(state_ranking$Electricity_Cost)
+
+# clean average
+state_ranking$Average_IQ <- as.numeric(state_ranking$Average_IQ)
+
+# clean repblican_vote
+state_ranking$Republican_vote <- str_sub(state_ranking$Republican_vote, end=-2)
+state_ranking$Republican_vote <- as.numeric(state_ranking$Republican_vote)
+
+# create new column: category
+state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, 1, 0))
 ```
 
 ```{r}
@@ -171,7 +243,8 @@ Clean_energy$Clean_percent <- Clean_energy$Clean_energy_MW/Clean_energy$Total_MW
 ```
 
 ```{r}
-final_df <- merge(Clean_energy, state_rankings_df_merge)
+final_df <- merge(Clean_energy, state_ranking)
+
 ```
 
 
