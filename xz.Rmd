@@ -1,5 +1,5 @@
 ---
-title: "State's Scraped_JS"
+title: "clean state_rankings_raw data"
 author: "XZ"
 date: "2023-05-02"
 output: html_document

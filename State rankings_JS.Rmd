@@ -154,7 +154,7 @@ state_rankings_df_merge
 ```
 
 ```{r}
-write.csv(state_rankings_df_merge, file = "state rankings_raw",
+write.csv(state_rankings_df_merge, file = "state rankings_raw.csv",
           row.names = FALSE)
 ```
 
