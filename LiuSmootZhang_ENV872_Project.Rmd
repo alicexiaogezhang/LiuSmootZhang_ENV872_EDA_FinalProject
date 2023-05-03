@@ -14,7 +14,7 @@ Our research questions include:
 2. What role do demographic variables, such as IQ and political affiliation, play in shaping attitudes towards renewable energy and driving adoption?
 
 ### Project Setup
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
 #1
 #Install familiar packages
@@ -341,6 +341,49 @@ leaflet(powerp) %>%
     opacity = 1
   )
 ```
+
+We then mapped the clean energy percentage in each state. The state boundaries data came from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5. 
+```{r}
+# read in the shapefile
+states_shp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/tl_2012_us_state.shp')
+states_shp <- st_transform(states_shp, c=4326)
+
+# join the dataframe with clean energy percentage by state to the state shapefile
+join_states <- full_join(states_shp, final_df, by = c('NAME' = 'States'))
+
+# visualize on map
+bins <- c(NA, 0, 0.20, 0.40, 0.60, 0.80, 1.00)
+pal2 <- colorBin("Greens", domain = join_states$Clean_percent, bins = bins)
+
+labels <- sprintf(
+  "<strong>%s</strong><br/>%g ",
+  join_states$NAME, join_states$Clean_percent) %>% lapply(htmltools::HTML)
+
+leaflet(join_states) %>%
+  setView(-96, 37.8, 3) %>%
+  addPolygons(
+    fillColor = ~pal2(Clean_percent),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) %>%
+  addLegend(pal = pal2, values = ~Clean_percent, opacity = 0.7, title = NULL,
+    position = "bottomright")
+
+```
+
 
 ## Analysis
 ### Regression Analysis

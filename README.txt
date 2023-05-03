@@ -16,7 +16,7 @@ What role do demographic variables, such as IQ and political affiliation, play i
 
 ## Database Information
 
-< Our main data came from US energy atlas: https://atlas.eia.gov/datasets/eia::power-plants/about. Other data was scraped from the following sources: https://www.bea.gov/data/gdp/gdp-state; https://wisevoter.com/state-rankings/red-and-blue-states/; https://wisevoter.com/state-rankings/electricity-cost-by-state/; https://wisevoter.com/state-rankings/air-quality-by-state/>
+< Our main data came from US energy atlas: https://atlas.eia.gov/datasets/eia::power-plants/about. Other data was scraped from the following sources: https://www.bea.gov/data/gdp/gdp-state; https://wisevoter.com/state-rankings/red-and-blue-states/; https://wisevoter.com/state-rankings/electricity-cost-by-state/; https://wisevoter.com/state-rankings/air-quality-by-state/>. The state boundaries shapefiles came from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5. 
 
 ## Folder structure, file formats, and naming conventions 
 
