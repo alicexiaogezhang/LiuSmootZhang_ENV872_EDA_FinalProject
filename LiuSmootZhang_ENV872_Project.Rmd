@@ -295,6 +295,7 @@ final_naomit <- final_df %>%
 final_corr <- cor(final_naomit)
 corrplot.mixed(final_corr, upper = "ellipse", tl.cex = 0.6)
 ```
+
 ### Histogram
 We want to take a deeper dive into the distribution of each variables by histograms. Based on the histograms, oil production, GDP and electricity cost are skewed, which indicates that transformation is needed for those variables. 
 ```{r histogram}
@@ -310,6 +311,7 @@ hist(final_naomit$Republican_vote, xlab = "Republican Vote", main = NULL)
 ```
 
 ### Map
+Next, we visualize our power plants data by making an interactive map widget with the leaflet package. We first categorized the power plant as "clean energy" or "other" based on the "primary source" attribute - we considered biomass, geothermal, hydroelectric, pumped storage, nuclear, solar, and wind to be clean. For the map, we plotted clean energy power plants as blue and other as red; the size of the markers was scaled to indicate the maximum output and was expressed in megawatts in original data. You can pan around and zoom in and out to explore the dataset. 
 ```{r map}
 # read in the shapefile
 powerp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/Power_Plants.shp')
