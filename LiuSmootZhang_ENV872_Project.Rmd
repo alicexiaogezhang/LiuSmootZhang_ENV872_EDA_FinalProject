@@ -1,7 +1,7 @@
 ---
 title: "LiuSmootZhang_ENV872_Project"
 output: html_document
-date: "2023-05-02"
+date: "2023-05-03"
 ---
 
 ## Rationale and Research Questions
@@ -201,12 +201,12 @@ state_rankings_df_merge <- Reduce(function(x, y) merge(x, y, by = "States", all 
                    list(df_aq, df_oil, df_gdp, df_sunny, df_ecost, df_iq, df_party))
 
 # View merged data frame
-state_rankings_df_merge
+head(state_rankings_df_merge)
 ```
 
 
 ```{r}
-write.csv(state_rankings_df_merge, file = "state rankings_raw.csv",
+write.csv(state_rankings_df_merge, file = "~/LiuSmootZhang_ENV872_EDA_FinalProject/data_processed/state rankings_raw.csv",
           row.names = FALSE)
 ```
 
@@ -215,7 +215,7 @@ Next, we clean the data scraped from various websites before merging it with the
 
 ```{r}
 # read in raw data
-state_ranking <- read.csv('state rankings_raw.csv', header = TRUE)
+state_ranking <- read.csv('~/LiuSmootZhang_ENV872_EDA_FinalProject/data_processed/state rankings_raw.csv', header = TRUE)
 # save a copy of raw data before making changes
 state_ranking_raw <- state_ranking
 
@@ -263,7 +263,7 @@ state_ranking$party <- with(state_ranking, ifelse(Republican_vote > 50, "Red", "
 
 For the response variable, clean energy adoption rate, data wrangling and calculation are needed. We first transform all NAs to 0 so that we can later aggregate the capacity for each energy source. The next step is to calculate the total clean energy capacity and total energy generation capacity for each power plant. After that, we aggregate all the power plants by states and calculate the clean energy percentage for each state. 
 
-```{r}
+```{r warning=FALSE}
 Power_plant <- read.csv(here("data_raw/Power_Plants.csv"), stringsAsFactors = TRUE)
 
 Power_plant[is.na(Power_plant)] <- 0
@@ -429,7 +429,7 @@ Based on the T-test result, the clean energy adoption rate for Red and Blue stat
 ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
   geom_boxplot()+
   labs(title = "Clean Energy Adoption Rate by Red or Blue State", y="Clean Energy Percentage (%)", x="Party", fill ="Party")+
-  scale_fill_manual(values=c("skyblue3", "firebrick3"))
+  scale_fill_manual(values=c("skyblue", "tomato"))
 ```
 
 ## Conclusion
