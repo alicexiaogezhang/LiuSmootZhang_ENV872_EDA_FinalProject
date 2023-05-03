@@ -14,7 +14,7 @@ Our research questions include:
 2. What role do demographic variables, such as IQ and political affiliation, play in shaping attitudes towards renewable energy and driving adoption?
 
 ### Project Setup
-```{r setup}
+```{r setup, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #1
 #Install familiar packages
@@ -49,15 +49,16 @@ The dataset for this analysis was collected from various sources including the N
 The dataset was first imported into R as separate data frames and then merged into a single data frame using the merge() function. Before merging, data cleaning and manipulation were performed to ensure consistency across variables and eliminate missing values. For instance, some variables were renamed, and missing values were replaced with appropriate values or removed entirely.
 
 The final dataset contains 50 observations (one for each state) and 7 variables. The variables in the dataset are summarized in the table below:
-| Variable                        | Unit      | Range / Central Tendency | Data Source                         |
-|---------------------------------|-----------|--------------------------|-------------------------------------|
-| Good_Air_Quality_Days_Percentage| Percentage| 35.8-89.4                | wisevoter.com |
-| Oil_Production                  | Thousand barrels per day | 0-4700| wisevoter.com |
-| GDP                             | Billion dollars | 54.7-2,784.1         | wisevoter.com    |
-| Sunshine                        | Hours per day | 3.7-10.3            | wisevoter.com |
-| Electricity_Cost                | Cents per kilowatt hour | 5.6-20.5   | wisevoter.com |
-| Average_IQ                      | IQ points | 94.8-103.9           | wisevoter.com |
-| Republican_vote                 | Percentage| 23.5-70.4            | wisevoter.com |
+
+| Variable | Unit | Range / Central Tendency | Data Source |
+|---|---|---|---|
+| Good_Air_Quality_Days_Percentage| Percentage| 35.8-89.4 | wisevoter.com |
+| Oil_Production | Thousand barrels per day | 0-4700| wisevoter.com |
+| GDP | Billion dollars | 54.7-2,784.1 | wisevoter.com |
+| Sunshine | Hours per day | 3.7-10.3 | wisevoter.com |
+| Electricity_Cost | Cents per kilowatt hour | 5.6-20.5 | wisevoter.com |
+| Average_IQ | IQ points | 94.8-103.9 | wisevoter.com |
+| Republican_vote | Percentage | 23.5-70.4 | wisevoter.com |
 
 ### Data Scraping
 ```{r air quality data scraping}
@@ -206,7 +207,7 @@ head(state_rankings_df_merge)
 
 
 ```{r}
-write.csv(state_rankings_df_merge, file = "~/LiuSmootZhang_ENV872_EDA_FinalProject/data_processed/state rankings_raw.csv",
+write.csv(state_rankings_df_merge, file = here("data_processed/state rankings_raw.csv"),
           row.names = FALSE)
 ```
 
@@ -215,7 +216,7 @@ Next, we clean the data scraped from various websites before merging it with the
 
 ```{r}
 # read in raw data
-state_ranking <- read.csv('~/LiuSmootZhang_ENV872_EDA_FinalProject/data_processed/state rankings_raw.csv', header = TRUE)
+state_ranking <- read.csv(here("data_processed/state rankings_raw.csv"), header = TRUE)
 # save a copy of raw data before making changes
 state_ranking_raw <- state_ranking
 
@@ -400,10 +401,8 @@ TPmodel <- lm(data = final_naomit, Clean_percent ~ Good_Air_Quality_Days_Percent
 summary(TPmodel)
 ```
 
-With a degree of freedom of 26, our finalized model shows that the explanatory variables can account for 38.34% of the observed variance in response variable. This regression has a p-value of 0.01, indicating strong statistical significance. Among the explanatory variables, logged GDP and Republican vote are highly statistical significant (p-value < 0.05) while air quality and average IQ are less significant with p-values ranging from 0.05 to 0.1.
 
-####Could we include this text for the regression analysis? JS####
-[The coefficients table provides the estimated coefficients for each explanatory variable, which indicate the expected change in the response variable for a one-unit increase in the explanatory variable while holding other variables constant. For example, a one-unit increase in the log(GDP) variable is associated with a 0.0919 decrease in the Clean_percent variable while holding the other variables constant.
+The coefficients table provides the estimated coefficients for each explanatory variable, which indicate the expected change in the response variable for a one-unit increase in the explanatory variable while holding other variables constant. For example, a one-unit increase in the log(GDP) variable is associated with a 0.0919 decrease in the Clean_percent variable while holding the other variables constant.
 
 The p-values in the table indicate the level of statistical significance for each variable. A p-value less than the significance level of 0.05 suggests that the variable is statistically significant in explaining the variation in the response variable. In this model, log(GDP) and Republican_vote are statistically significant, while Average_IQ is marginally significant at the 0.05 level.
 
@@ -423,8 +422,9 @@ Based on the above plots, there are no outliners that significantly impact the r
 party <- t.test(final_df$Clean_percent ~ final_df$party)
 party
 ```
-####I edited this ~JS
-Based on the T-test result, the clean energy adoption rate for Red and Blue states are not statistically different. The test statistic t is 1.0798 with degrees of freedom (df) of 47.659 and a p-value of 0.2857. The p-value is greater than the significance level of 0.05, so we fail to reject the null hypothesis. This means that we do not have enough evidence to conclude that there is a significant difference in the mean percentage of clean energy adoption between Blue and Red states.
+
+Based on the T-test result, the clean energy adoption rate for Red and Blue states are not statistically different. The test statistic t is 1.0798 with degrees of freedom (df) of 47.659 and a p-value of 0.2857. The p-value is greater than the significance level of 0.05, so we fail to reject the null hypothesis of equality. This means that we do not have enough evidence to conclude that there is a significant difference in the mean percentage of clean energy adoption between Blue and Red states.
+
 ```{r}
 ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
   geom_boxplot()+
@@ -433,7 +433,6 @@ ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
 ```
 
 ## Conclusion
-
 
 In this study, we sought to investigate the relationship between various demographic, economic, and political factors with the adoption of clean energy in the US states. Our analysis of the data revealed some interesting findings that can help us better understand this relationship.
 
