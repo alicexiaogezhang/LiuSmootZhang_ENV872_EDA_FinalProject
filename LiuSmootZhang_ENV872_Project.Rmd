@@ -357,6 +357,13 @@ summary(TPmodel)
 
 With a degree of freedom of 26, our finalized model shows that the explanatory variables can account for 38.34% of the observed variance in response variable. This regression has a p-value of 0.01, indicating strong statistical significance. Among the explanatory variables, logged GDP and Republican vote are highly statistical significant (p-value < 0.05) while air quality and average IQ are less significant with p-values ranging from 0.05 to 0.1.
 
+####Could we include this text for the regression analysis? JS####
+[The coefficients table provides the estimated coefficients for each explanatory variable, which indicate the expected change in the response variable for a one-unit increase in the explanatory variable while holding other variables constant. For example, a one-unit increase in the log(GDP) variable is associated with a 0.0919 decrease in the Clean_percent variable while holding the other variables constant.
+
+The p-values in the table indicate the level of statistical significance for each variable. A p-value less than the significance level of 0.05 suggests that the variable is statistically significant in explaining the variation in the response variable. In this model, log(GDP) and Republican_vote are statistically significant, while Average_IQ is marginally significant at the 0.05 level.
+
+The Adjusted R-squared value of 0.2885 indicates that the model explains approximately 28.85% of the variation in the response variable after adjusting for the number of explanatory variables. The F-statistic of 4.041 with a p-value of 0.01115 suggests that at least one of the explanatory variables is significant in explaining the response variable. The Residual standard error of 0.1506 indicates the variation in the response variable that cannot be explained by the model.]
+
 
 ```{r}
 par(mfrow = c(2,2), mar=c(4,4,4,4))
@@ -371,8 +378,8 @@ Based on the above plots, there are no outliners that significantly impact the r
 party <- t.test(final_df$Clean_percent ~ final_df$party)
 party
 ```
-Based on the T-test result, the clean energy adoption rate for Red and Blue states are different. The p-value for the test is 0.2857 (>0.05) so we fail to reject the null hypothesis of equality. The boxplots below verify the t-test result. 
-
+####I edited this ~JS
+Based on the T-test result, the clean energy adoption rate for Red and Blue states are not statistically different. The test statistic t is 1.0798 with degrees of freedom (df) of 47.659 and a p-value of 0.2857. The p-value is greater than the significance level of 0.05, so we fail to reject the null hypothesis. This means that we do not have enough evidence to conclude that there is a significant difference in the mean percentage of clean energy adoption between Blue and Red states.
 ```{r}
 ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
   geom_boxplot()+
@@ -382,3 +389,13 @@ ggplot(final_df, aes(y=Clean_percent, x=party, fill = party)) +
 
 ## Conclusion
 
+
+In this study, we sought to investigate the relationship between various demographic, economic, and political factors with the adoption of clean energy in the US states. Our analysis of the data revealed some interesting findings that can help us better understand this relationship.
+
+Our regression analysis showed that state GDP and Republican vote are significant predictors of the percentage of clean energy adoption in the state. Average IQ is a marginally significant predictor of the percentage of clean energy adoption in the state. Of these, GDP and Republican vote had a negative relationship with clean energy adoption, meaning that as these variables increased, the percentage of clean energy adoption decreased. In contrast, average IQ had a positive relationship with clean energy adoption, suggesting that states with higher average IQ tend to have a higher percentage of clean energy adoption.
+
+While the negative relationship between GDP and clean energy adoption may seem counterintuitive, it may reflect the fact that high GDP states have a stronger presence of energy-intensive industries, which may be resistant to clean energy adoption. Additionally, the negative relationship with Republican vote suggests that political ideology may also play a role in clean energy adoption, with Republican-leaning states being less likely to adopt clean energy.
+
+Our t-test revealed that there is no statistically significant difference between the mean percentage of clean energy adoption in Blue and Red states. While the mean percentage of clean energy adoption was higher in Blue states, this difference was not statistically significant. However, this finding should be interpreted with caution, as our analysis did not control for other factors that may influence clean energy adoption.
+
+Overall, our findings suggest that demographic, economic, and political factors are all important predictors of clean energy adoption in the US states. States with better air quality and higher average IQ tend to have a higher percentage of clean energy adoption, while states with higher GDP and more Republican-leaning voters tend to have a lower percentage of clean energy adoption. These findings may have important implications for policymakers seeking to promote clean energy adoption in the US and can serve as a starting point for further research in this area.
