@@ -342,7 +342,7 @@ leaflet(powerp) %>%
   )
 ```
 
-We then mapped the clean energy percentage in each state. The state boundaries data came from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5. 
+We then mapped the clean energy percentage in each state. Thanks to the help from https://rstudio.github.io/leaflet/choropleths.html, we were able to make this interactive map widge. You can pan around, zoom, and hover your mouse over each state to see its clean enegery percentage and state name in a popup window. The state boundaries data came from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5. 
 ```{r}
 # read in the shapefile
 states_shp <- st_read('../LiuSmootZhang_ENV872_EDA_FinalProject/data_raw/tl_2012_us_state.shp')
